@@ -3,13 +3,14 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.IO;
 
-public class HighScore {
-
+public class HighScore
+{
     public List<string> Name { get; set; }
     public List<int> Score { get; set; }
 
     // Constructor
-    public HighScore() {
+    public HighScore()
+    {
         Name = new List<string>();
         Score = new List<int>();
 
@@ -28,29 +29,35 @@ public class HighScore {
         return strName;
     }
 
-    public string GetHighScore() {
+    public string GetHighScore()
+    {
         string strScore = "";
 
-        foreach (int it in Score) {
+        foreach (int it in Score)
+        {
             strScore += it.ToString() + "\n\n";
         }
 
         return strScore;
     }
 
-    public void UpdateHighScore(string newName, int newScore) {
+    public void UpdateHighScore(string newName, int newScore)
+    {
 
         bool insert = false;
 
-        for (int i = 0; i < Score.Count; i++) {
-            if (newScore > Score[i] && !insert) {
+        for (int i = 0; i < Score.Count; i++)
+        {
+            if (newScore > Score[i] && !insert)
+            {
                 Name.Insert(i, newName);
                 Score.Insert(i, newScore);
                 insert = true;
             }
         }
 
-        if (!insert) {
+        if (!insert)
+        {
             Name.Add(newName);
             Score.Add(newScore);
         }
@@ -131,6 +138,6 @@ public class HighScore {
 
         return false;
     }
-    
+
     private static string path = Application.dataPath + "/Resources/score.txt";
 }

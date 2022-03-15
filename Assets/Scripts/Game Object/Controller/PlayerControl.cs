@@ -1,16 +1,15 @@
 ﻿using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
-public class PlayerControl : MonoBehaviour {
+public class PlayerControl : MonoBehaviour
+{
+    const int InvulnerableTime = 120;
 
-    const int InvunerableTime = 120;
-
-    Player PlayerGO;
-    Rigidbody2D rb;
-    LifeUI lifeUI;
-    PlayGameManager Manager;
-    int inv;
+    private Player playerGO;
+    private Rigidbody2D rb;
+    private LifeUI lifeUI;
+    private PlayGameManager manager;
+    private float invulnerableTimeRemaining;
 
     public GameObject ExplosionAnim;
     public GameObject Bullet;
@@ -18,11 +17,13 @@ public class PlayerControl : MonoBehaviour {
     public int health;
     public int life;
 
-    void Awake() {
+    void Awake()
+    {
         rb = GetComponent<Rigidbody2D>();
-        SetInvunerable();
+        SetInvulnerable();
 
-        PlayerGO = new Player {
+        playerGO = new Player
+        {
             Speed = speed,
             Reload = 0.1f,
             Health = health,
@@ -31,78 +32,88 @@ public class PlayerControl : MonoBehaviour {
         };
     }
 
-    void Start() {
+    void Start()
+    {
         lifeUI = GameObject.FindGameObjectWithTag("LifeTextTag").GetComponent<LifeUI>();
-        Manager = GameObject.FindGameObjectWithTag("Manager").GetComponent<PlayGameManager>();
+        manager = GameObject.FindGameObjectWithTag("Manager").GetComponent<PlayGameManager>();
     }
 
-    void Update() {
+    void Update()
+    {
         if (Time.timeScale == 0) return;
 
-        if (inv > 0) inv--;
+        // Handle invulnerability
+        if (invulnerableTimeRemaining > 0) invulnerableTimeRemaining -= Time.deltaTime;
 
-
-
-        PlayerGO.X = Input.GetAxis("Horizontal"); //* Time.deltaTime;
-        PlayerGO.Y = Input.GetAxis("Vertical"); //* Time.deltaTime;
-        PlayerGO.Move(rb);
+        // Handle movement
+        playerGO.X = Input.GetAxis("Horizontal");
+        playerGO.Y = Input.GetAxis("Vertical");
+        playerGO.Move(rb);
     }
 
-    void OnTriggerEnter2D(Collider2D col) {
-        GameObject collider = col.gameObject;
-
-        if (collider.tag == "EnemyShipTag" && inv <= 0) {
-            collider.GetComponent<EnemyControl>().Damage(250);
+    void OnTriggerEnter2D(Collider2D col)
+    {
+        if (col.CompareTag("EnemyShipTag") && invulnerableTimeRemaining <= 0)
+        {
+            col.GetComponent<EnemyControl>().Damage(250);
             Damage(250);
         }
     }
 
-    public void AddLife() {
-        PlayerGO.UpdateLife(PlayerGO.Life + 1);
-        lifeUI.DisplayLife(PlayerGO.Life);
+    public void AddLife()
+    {
+        playerGO.UpdateLife(playerGO.Life + 1);
+        lifeUI.DisplayLife(playerGO.Life);
     }
 
-    public void Damage(int v) {
-        if (inv <= 0) {
-            PlayerGO.DoDamage(v);
+    public void Damage(int damageAmount)
+    {
+        if (invulnerableTimeRemaining <= 0)
+        {
+            playerGO.DoDamage(damageAmount);
         }
 
-        if (PlayerGO.Health <= 0) {
-            PlayerGO.Health = health;
-            PlayerGO.UpdateLife(PlayerGO.Life - 1);
-            lifeUI.DisplayLife(PlayerGO.Life);
+        if (playerGO.Health <= 0)
+        {
+            playerGO.Health = health;
+            playerGO.UpdateLife(playerGO.Life - 1);
+            lifeUI.DisplayLife(playerGO.Life);
 
-            SetInvunerable();
+            SetInvulnerable();
             PlayExplosion();
         }
 
-        if (PlayerGO.Life <= 0) {
-            Manager.IsVictory(false);
+        if (playerGO.Life <= 0)
+        {
+            manager.IsVictory(false);
             Destroy(gameObject);
         }
     }
 
-    void PlayExplosion() {
+    void PlayExplosion()
+    {
         GameObject explosion = Instantiate(ExplosionAnim);
         explosion.transform.position = transform.position;
     }
 
-    void SetInvunerable() {
-        inv = InvunerableTime;
+    void SetInvulnerable()
+    {
+        invulnerableTimeRemaining = InvulnerableTime / 60f; // Set the invulnerable time to a fraction of a second
 
         Renderer renderer = GetComponent<Renderer>();
-        float blink_ratio = 0.05f;
-        int total_blink = (int)(inv / 60 / blink_ratio / 2);
+        float blinkRatio = 0.05f;
+        int totalBlinks = (int)(invulnerableTimeRemaining / blinkRatio / 2);
 
-        StartCoroutine(DoBlinks(renderer, total_blink, blink_ratio));
+        StartCoroutine(DoBlinks(renderer, totalBlinks, blinkRatio));
     }
 
-    IEnumerator DoBlinks(Renderer renderer, int numBlinks, float seconds) {
-        for (int i = 0; i < numBlinks * 2; i++) {
+    IEnumerator DoBlinks(Renderer renderer, int numBlinks, float blinkInterval)
+    {
+        for (int i = 0; i < numBlinks * 2; i++)
+        {
             renderer.enabled = !renderer.enabled;
-            yield return new WaitForSeconds(seconds);
+            yield return new WaitForSeconds(blinkInterval);
         }
         renderer.enabled = true;
     }
-
 }

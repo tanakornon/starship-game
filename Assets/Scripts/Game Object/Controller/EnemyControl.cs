@@ -1,11 +1,10 @@
 ﻿using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
-public class EnemyControl : MonoBehaviour {
-
-    bool addedScore;
-    bool sleep;
+public class EnemyControl : MonoBehaviour
+{
+    private bool addedScore;
+    private bool sleep;
 
     protected Enemy enemyGO;
     protected Rigidbody2D rb;
@@ -15,76 +14,93 @@ public class EnemyControl : MonoBehaviour {
     public float speed;
     public int health;
     public int score;
-    public float decray;
+    public float decay;
 
-    void Awake() {
+    void Awake()
+    {
         addedScore = false;
         sleep = false;
 
         rb = GetComponent<Rigidbody2D>();
 
-        enemyGO = new Enemy {
+        enemyGO = new Enemy
+        {
             Speed = speed,
             Reload = 0.1f,
             Health = health,
-            Angle = transform.eulerAngles.z + 90
+            Angle = transform.eulerAngles.z + 90f
         };
     }
 
-    void Start() {
-        scoreUI = GameObject.FindGameObjectWithTag("ScoreTextTag").GetComponent<ScoreUI>();
+    void Start()
+    {
+        var scoreObj = GameObject.FindGameObjectWithTag("ScoreTextTag");
+        if (scoreObj != null)
+        {
+            scoreUI = scoreObj.GetComponent<ScoreUI>();
+        }
     }
 
-    void Update() {
+    void Update()
+    {
         if (Time.timeScale == 0) return;
 
-        Vector3 moveDir;
-
-        if (!sleep) {
-            enemyGO.Speed -= decray;
-        } else {
-            enemyGO.Speed += decray;
+        if (!sleep)
+        {
+            enemyGO.Speed -= decay * Time.deltaTime;
+            if (enemyGO.Speed < 0f)
+            {
+                enemyGO.Speed = 0f;
+                sleep = true;
+            }
+        }
+        else
+        {
+            enemyGO.Speed += decay * Time.deltaTime;
         }
 
-        if (enemyGO.Speed < 0) {
-            sleep = true;
-        }
-
-        moveDir = Quaternion.Euler(0, 0, enemyGO.Angle) * Vector3.right;
+        Vector3 moveDir = Quaternion.Euler(0, 0, enemyGO.Angle) * Vector3.right;
         rb.velocity = moveDir * enemyGO.Speed;
-
     }
 
-    void OnBecameInvisible() {
+    void OnBecameInvisible()
+    {
         Destroy(gameObject);
     }
 
-    void PlayExplosion() {
-        GameObject explosion = Instantiate(ExplosionAnim);
-        explosion.transform.position = transform.position;
+    void PlayExplosion()
+    {
+        if (ExplosionAnim != null)
+        {
+            GameObject explosion = Instantiate(ExplosionAnim, transform.position, Quaternion.identity);
+        }
     }
 
-    public void SetFacing(float value) {
-        enemyGO.ChangeAngle(value);
-        transform.eulerAngles = new Vector3(0, 0, enemyGO.Angle - 90);
+    public void SetFacing(float angleDelta)
+    {
+        enemyGO.ChangeAngle(angleDelta);
+        transform.eulerAngles = new Vector3(0, 0, enemyGO.Angle - 90f);
     }
 
-    public void SetSpeed(float v) {
-        enemyGO.Speed = v;
+    public void SetSpeed(float newSpeed)
+    {
+        enemyGO.Speed = newSpeed;
     }
 
-    public void Damage(int v) {
-        enemyGO.DoDamage(v);
+    public void Damage(int damage)
+    {
+        enemyGO.DoDamage(damage);
 
-        if (enemyGO.Health <= 0) {
-
-            PlayExplosion();
-            Destroy(gameObject);
-
-            if (!addedScore) {
+        if (enemyGO.Health <= 0)
+        {
+            if (!addedScore)
+            {
                 addedScore = true;
                 scoreUI.AddScore(score);
             }
+
+            PlayExplosion();
+            Destroy(gameObject);
         }
     }
 }

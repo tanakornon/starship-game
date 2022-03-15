@@ -2,54 +2,58 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Gun : MonoBehaviour {
-
+public class Gun : MonoBehaviour
+{
     protected float delay;
     protected float sreload;
     protected float sfireRate;
 
     protected float angle;
-    protected float cntBullet;
+    protected int cntBullet;
 
     public GameObject bullet;
     public int maxBullet;
-    public float reload;
-    public float fireRate;
+    public float reload;    // seconds
+    public float fireRate;  // seconds
     public float speed;
 
-    protected void Start() {
-        angle = gameObject.transform.eulerAngles.z + 90;
-
-        sreload = reload * 60;
-        sfireRate = fireRate * 60;
-
-        delay = 0;
+    protected virtual void Start()
+    {
+        angle = transform.eulerAngles.z + 90f;
+        sreload = reload;       // in seconds now
+        sfireRate = fireRate;   // in seconds
+        delay = 0f;
+        cntBullet = 0;
     }
 
-    void Update() {
+    protected virtual void Update()
+    {
         if (Time.timeScale == 0) return;
 
-        if (delay > sreload) {
+        delay += Time.deltaTime;
 
-            if (delay > sreload + sfireRate) {
+        if (delay > sreload)
+        {
+            if (delay > sreload + sfireRate)
+            {
                 Shoot(angle, speed);
                 cntBullet++;
-                delay = sreload;
+                delay = sreload; // lock in until bullets exhausted
             }
 
-            if (cntBullet == maxBullet) {
+            if (cntBullet == maxBullet)
+            {
                 cntBullet = 0;
-                delay = 0;
+                delay = 0f;
             }
-
         }
-
-        delay++;
     }
 
-    protected void Shoot(float Angle, float Speed) {
-        GameObject Temp = Instantiate(bullet, gameObject.transform.position, Quaternion.identity);
-        Temp.GetComponent<BulletControl>().SetAngle(Angle);
-        Temp.GetComponent<BulletControl>().SetSpeed(Speed);
+    protected void Shoot(float Angle, float Speed)
+    {
+        GameObject temp = Instantiate(bullet, transform.position, Quaternion.identity);
+        var bc = temp.GetComponent<BulletControl>();
+        bc.SetAngle(Angle);
+        bc.SetSpeed(Speed);
     }
 }

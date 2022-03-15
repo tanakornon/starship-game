@@ -2,32 +2,38 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class FanGun : Gun {
-
+public class FanGun : Gun
+{
     public int maxFan;
     public int angleRatio;
 
-    private void Update() {
+    private float delay = 0f;
+    private int cntBullet = 0;
+
+    private void Update()
+    {
         if (Time.timeScale == 0) return;
 
-        if (delay > sreload) {
+        delay += Time.deltaTime;
 
-            if (delay > sreload + sfireRate) {
-                for (int i = -maxFan / 2; i <= maxFan / 2; i++) {
+        if (delay > sreload)
+        {
+            if (delay > sreload + sfireRate)
+            {
+                for (int i = -maxFan / 2; i <= maxFan / 2; i++)
+                {
                     Shoot(angle - (i * angleRatio), speed);
                 }
 
                 cntBullet++;
-                delay = sreload;
+                delay = sreload; // stay in fire mode until maxBullet
             }
 
-            if (cntBullet == maxBullet) {
+            if (cntBullet == maxBullet)
+            {
                 cntBullet = 0;
-                delay = 0;
+                delay = 0f; // reset cycle
             }
         }
-
-        delay++;
     }
-
 }

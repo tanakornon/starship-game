@@ -10,7 +10,8 @@ public class Item
     public float Direction { get; set; }
     public int Item_Type { get; set; }
 
-    public void Start(GameObject go) {
+    public void Start(GameObject go)
+    {
         Object.Instantiate(go, go.transform.position, Quaternion.identity);
     }
 

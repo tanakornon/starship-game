@@ -2,35 +2,41 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class CircleGun : Gun {
-
+public class CircleGun : Gun
+{
     public int Direction;
     public float AngleRatio;
 
-    void Update() {
+    private float delay = 0f;
+    private int cntBullet = 0;
+
+    void Update()
+    {
         if (Time.timeScale == 0) return;
 
-        if (delay > sreload) {
+        delay += Time.deltaTime;
 
-            if (delay > sreload + sfireRate) {
-
-                for (int i = 0; i < Direction; i++) {
-                    Shoot(angle + (i * (360 / Direction)), speed);
+        if (delay > sreload)
+        {
+            if (delay > sreload + sfireRate)
+            {
+                for (int i = 0; i < Direction; i++)
+                {
+                    Shoot(angle + (i * (360f / Direction)), speed);
                 }
 
-                angle += AngleRatio % 360;
+                angle = (angle + AngleRatio) % 360f;
 
                 cntBullet++;
-                delay = sreload;
+                delay = sreload; // maintain fire mode
             }
 
-            if (cntBullet == maxBullet) {
+            if (cntBullet == maxBullet)
+            {
                 cntBullet = 0;
-                delay = 0;
+                delay = 0f;
             }
-
         }
-
-        delay++;
     }
 }
+

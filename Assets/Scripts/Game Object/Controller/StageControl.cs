@@ -7,8 +7,8 @@ public class StageControl : MonoBehaviour {
 
     Stage stage;
 
-    int enemyDelay;
-    int itemDelay;
+    float enemyTimer = 0f;
+    float itemTimer = 0f;
     int nStage = 1;
 
     public GameObject LBLStage;
@@ -50,22 +50,23 @@ public class StageControl : MonoBehaviour {
     }
 
     void Update() {
-        if (Time.timeScale == 0) return;
-        if (GameEnd) return;
+        if (Time.timeScale == 0 || GameEnd) return;
 
-        if (enemyDelay > 180 && AI.Count > 0) {
+        enemyTimer += Time.deltaTime;
+        itemTimer += Time.deltaTime;
+
+        if (enemyTimer >= 6f && AI.Count > 0)
+        { // 3 seconds
             StartCoroutine(Pattern(AI.Dequeue()));
-            enemyDelay = 0;
+            enemyTimer = 0f;
         }
 
-        if (itemDelay > 600) {
-            Vector3 Loc = new Vector3(Random.Range(-10.0f, 10.0f), 10, 0);
-            stage.SpawnItem(items[0], Loc);
-            itemDelay = 0;
+        if (itemTimer >= 10f)
+        { // 10 seconds
+            Vector3 loc = new Vector3(Random.Range(-10.0f, 10.0f), 10, 0);
+            stage.SpawnItem(items[0], loc);
+            itemTimer = 0f;
         }
-
-        enemyDelay++;
-        itemDelay++;
     }
 
     IEnumerator Pattern(char c) {

@@ -2,38 +2,39 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class HomingGun : Gun {
-
-    void Update() {
+public class HomingGun : Gun
+{
+    void Update()
+    {
         if (Time.timeScale == 0) return;
 
         GameObject player = GameObject.FindGameObjectWithTag("PlayerShipTag");
-
         if (player == null) return;
 
-        angle = FindAngle(gameObject, player);
+        angle = FindAngle(transform.position, player.transform.position);
 
-        if (delay > sreload) {
+        delay += Time.deltaTime;
 
-            if (delay > sreload + sfireRate) {
+        if (delay > sreload)
+        {
+            if (delay > sreload + sfireRate)
+            {
                 Shoot(angle, speed);
                 cntBullet++;
                 delay = sreload;
             }
 
-            if (cntBullet == maxBullet) {
+            if (cntBullet == maxBullet)
+            {
                 cntBullet = 0;
-                delay = 0;
+                delay = 0f;
             }
-
         }
-
-        delay++;
     }
 
-    float FindAngle(GameObject Start, GameObject Target) {
-        Vector3 start = Start.transform.position;
-        Vector3 target = Target.transform.position;
+    float FindAngle(Vector3 start, Vector3 target)
+    {
         return Mathf.Atan2(target.y - start.y, target.x - start.x) * Mathf.Rad2Deg;
     }
 }
+
